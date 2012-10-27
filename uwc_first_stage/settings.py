@@ -1,8 +1,9 @@
 import os.path
 import sys
 
-PROJECT_PATH = os.path.dirname(__file__)
+PROJECT_PATH = os.path.realpath(os.path.dirname(__file__))
 sys.path.append(os.path.join(PROJECT_PATH, 'apps'))
+
 
 PUBLIC_PATH = os.path.join(PROJECT_PATH, 'public')
 
@@ -13,6 +14,7 @@ ADMINS = (
     # ('', ''),
 )
 
+LOCAL_DEVELOPMENT = False
 MANAGERS = ADMINS
 
 TIME_ZONE = 'UTC'
@@ -92,6 +94,8 @@ INSTALLED_APPS = (
 
     # Apps:
     'core',
+    'providers',
+    'products'
 )
 
 
