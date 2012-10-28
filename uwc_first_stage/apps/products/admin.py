@@ -1,16 +1,88 @@
 from django.contrib import admin
-
 from models import Category, Product
-from products.models import Parameter, CategoryParameter, ParameterValue
+from products.models import Parameter, CategoryParameter, ParameterValue, ProductParameter
+
+
+class ProductParameterInline(admin.StackedInline):
+    """
+        Adds ability to add/change parameters on product page
+    """
+    model = ProductParameter
+
+    def queryset(self, request):
+        q = super(ProductParameterInline, self).queryset(request)
+        return q.select_related('parameter__parameter', 'value__parameter')
 
 
 class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     fields = ('provider', 'category', 'name', 'description', 'image', 'slug', 'published')
+    inlines = (
+        ProductParameterInline,
+    )
+
+    class Media:
+        # Managing categories and related parameters
+        js = ('js/admin/product_parameter_choices.js',)
+
+    def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
+        # Add category and parameters data to javascript context
+        # TODO: Remove this queries and do it ajax.
+        category_parameters = CategoryParameter.objects\
+            .filter(category__published=True)\
+            .order_by('category')\
+            .values_list('category', 'parameter')
+        # Categories and parameters
+        category_parameters_dict = {}
+        for cat, param in category_parameters:
+            category_parameters_dict.setdefault(cat, [] ).append(param)
+
+        parameter_values = ParameterValue.objects\
+            .all()\
+            .values_list('parameter', 'id')\
+            .order_by('parameter')
+        # Parameters and values
+        parameters_dict = {}
+        for param, val in parameter_values:
+            parameters_dict.setdefault(param, [] ).append(val)
+
+        request.javascript_settings.update({
+            'adminProductPage': {
+                'categoryParameters': category_parameters_dict,
+                'parameterValues': parameters_dict
+            }
+        })
+
+        return super(ProductAdmin, self).render_change_form(request, context, add=add, change=change, form_url=form_url, obj=obj)
 
 
 class CategoryParameterInline(admin.StackedInline):
+    """
+        Adds Ability to add/change parameters on Category add/change view
+    """
     model = CategoryParameter
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super(CategoryParameterInline, self).get_formset(request, obj=obj, **kwargs)
+        ids = []
+
+        if obj and obj.id:
+            ids.append(obj.id)
+            if obj.parent:
+                ids.append(obj.parent.id)
+
+        # Override queryset of parameters. Shows only instance and parent parameters
+        if ids:
+            formset.form.base_fields['parameter'].queryset = formset.form.base_fields['parameter']\
+                .queryset.filter(
+                related_categories__category__in=ids
+            ).distinct()
+
+        return formset
+
+    def queryset(self, request):
+        q = super(CategoryParameterInline, self).queryset(request)
+        return q.select_related('parameter', 'category', 'category__parent')
 
 
 class CategoryAdmin(admin.ModelAdmin):
@@ -22,12 +94,38 @@ class ParameterValueInline(admin.StackedInline):
     model = ParameterValue
 
     def queryset(self, request):
-        return super(ParameterValueInline, self).queryset(request).select_related('parameter')
+        q = super(ParameterValueInline, self).queryset(request)
+        return q.select_related('parameter')
+
+
+class CategoryInline(admin.StackedInline):
+    """
+        Select Category from Add/Change Parameter page
+    """
+    model = CategoryParameter
+    extra = 1
+    max_num = 1
+
+    def get_formset(self, request, obj=None, **kwargs):
+        formset = super(CategoryInline, self).get_formset(request, obj, **kwargs)
+
+        # Prepopulate category if we have id in get request
+        try:
+            category_id = int(request.GET.get('category'))
+        except TypeError:
+            category_id = None
+
+        if category_id:
+            formset.form.base_fields['category'].queryset = formset.form.base_fields['category'].queryset.filter(id=category_id)
+            formset.form.base_fields['category'].initial = category_id
+
+        return formset
 
 
 class ParameterAdmin(admin.ModelAdmin):
     inlines = [
-        ParameterValueInline
+        ParameterValueInline,
+        CategoryInline
     ]
 
 

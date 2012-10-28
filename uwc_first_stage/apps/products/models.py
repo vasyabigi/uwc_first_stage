@@ -88,14 +88,17 @@ class Product(models.Model):
 class Parameter(models.Model):
     name = models.CharField(_('Parameter Name'), max_length=120)
 
+    def __unicode__(self):
+        return u'%s' % self.name
+
 
 class ParameterValue(models.Model):
     parameter = models.ForeignKey(Parameter, related_name='values')
     value = models.CharField(max_length=120)
 
-    @select_related_required('parameter')
+    #@select_related_required('parameter')
     def __unicode__(self):
-        return u'%s - %s' (unicode(self.parameter), self.value)
+        return u'%s - %s' % (unicode(self.parameter), self.value)
 
 
 class CategoryParameter(models.Model):
@@ -109,17 +112,9 @@ class CategoryParameter(models.Model):
     class Meta:
         unique_together = (('category', 'parameter'),)
 
-    def __unicode__(self):
-        return u'%s' % self.name
-
-
-class ParameterValue(models.Model):
-    parameter = models.ForeignKey(Parameter, related_name='values')
-    value = models.CharField(max_length=120)
-
     @select_related_required('parameter')
     def __unicode__(self):
-        return u'%s - %s' (unicode(self.parameter), self.value)
+        return u'%s' % (self.parameter.name,)
 
 
 class ProductParameter(models.Model):
