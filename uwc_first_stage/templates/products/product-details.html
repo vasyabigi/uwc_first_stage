@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <p>Category: <a href="{{ category.get_absolute_url }}">{{ category }}</a></p>
+  <p>Product: {{ product }}</p>
+{% endblock content %}

@@ -3,19 +3,19 @@ from django.contrib import admin
 from models import Category, Product
 from products.models import Parameter, CategoryParameter, ParameterValue
 
+
 class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
-    fields = ('provider', 'category', 'name', 'description', 'image','slug', 'published')
-    
+    fields = ('provider', 'category', 'name', 'description', 'image', 'slug', 'published')
+
 
 class CategoryParameterInline(admin.StackedInline):
     model = CategoryParameter
 
 
 class CategoryAdmin(admin.ModelAdmin):
-    inlines = [
-        CategoryParameterInline
-    ]
+    prepopulated_fields = {"slug": ("name",)}
+    inlines = (CategoryParameterInline,)
 
 
 class ParameterValueInline(admin.StackedInline):
@@ -29,7 +29,6 @@ class ParameterAdmin(admin.ModelAdmin):
     inlines = [
         ParameterValueInline
     ]
-
 
 
 admin.site.register(Parameter, ParameterAdmin)

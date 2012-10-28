@@ -10,9 +10,8 @@ urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
 
     url(r'^$', home, name="home"),
+    url(r'^products/', include('products.urls')),
 )
-
-
 
 if settings.LOCAL_DEVELOPMENT:
     urlpatterns += patterns("django.views",

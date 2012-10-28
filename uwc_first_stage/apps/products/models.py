@@ -5,8 +5,20 @@ from core.decorators import select_related_required
 from core.models import BaseManager, QuerysetHelpers, get_upload_path
 
 
+class CategoryManager(models.Manager):
+
+    def published(self, **kwargs):
+        return self.filter(published=True, **kwargs)
+
+    def root_categories(self, **kwargs):
+        return self.published(parent__isnull=True, **kwargs)
+
+
 class Category(models.Model):
+    # TODO: Published categories?
+    # TODO: Position
     name = models.CharField(_('Category name'), max_length=150)
+    slug = models.SlugField(_('Category permalink'), unique=True)
     parent = models.ForeignKey(
         'self',
         related_name='subcategories',
@@ -14,9 +26,16 @@ class Category(models.Model):
         null=True,
         blank=True
     )
+    published = models.BooleanField(_("Category is published"), default=True)
+
+    objects = CategoryManager()
 
     def __unicode__(self):
         return u'%s' % self.name
+
+    @models.permalink
+    def get_absolute_url(self):
+        return 'category-details', (self.slug,)
 
 
 class ProductQueryset(models.query.QuerySet, QuerysetHelpers):
@@ -30,7 +49,7 @@ class ProductManager(BaseManager):
 
 class Product(models.Model):
     provider = models.ForeignKey('providers.Provider', related_name='products')
-    category = models.ForeignKey(Category)
+    category = models.ForeignKey(Category, related_name="products")
 
     name = models.CharField(_('Product name'), max_length=120)
     slug = models.SlugField(_('Product permalink'), unique=True)
@@ -41,7 +60,7 @@ class Product(models.Model):
         blank=True,
         upload_to=get_upload_path
     )
-    published = models.BooleanField(_("Product is published"),default=False)
+    published = models.BooleanField(_("Product is published"), default=False)
 
     created = models.DateTimeField(auto_now_add=True)
 
@@ -49,6 +68,10 @@ class Product(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.name
+
+    @models.permalink
+    def get_absolute_url(self):
+        return 'product-details', (self.category.slug, self.slug)
 
 
 class Parameter(models.Model):
@@ -96,7 +119,5 @@ class ProductParameter(models.Model):
     class Meta:
         unique_together = ('product', 'parameter')
 
-
     def __unicode__(self):
         return u'%s' % self.value
-

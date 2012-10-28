@@ -1,16 +1,17 @@
 from django.db import models
 import os
 
+
 class QuerysetHelpers(object):
     """
-        Mix in for Queriset that provides good and helpful methods
+        Mixin for Queryset that provides good and helpful methods
     """
 
     DEFAULT_SELECT_RELATED = None
     DEFAULT_PREFETCH_RELATED = None
 
     def published(self):
-        return  self.filter(published=True)
+        return self.filter(published=True)
 
     def with_related(self):
         """
@@ -35,7 +36,6 @@ class BaseManager(models.Model):
             return getattr(self.__class__, attr, *args)
         except AttributeError:
             return getattr(self.get_query_set(), attr, *args)
-
 
 
 def get_upload_path(instance, name):

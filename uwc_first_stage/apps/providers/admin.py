@@ -6,4 +6,4 @@ class ProviderAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
 
 
-admin.site.register(Provider)
+admin.site.register(Provider, ProviderAdmin)
