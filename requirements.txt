@@ -1,4 +1,5 @@
 django
+-e git+https://github.com/django-stars/django-js-settings.git#egg=django-javascript-settings
 south
 django-debug-toolbar
 django-extensions
