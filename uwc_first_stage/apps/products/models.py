@@ -5,7 +5,7 @@ from core.decorators import select_related_required
 from core.models import BaseManager, QuerysetHelpers, get_upload_path
 
 
-class CategoryManager(QuerysetHelpers):
+class CategoryManager(models.Manager, QuerysetHelpers):
     def root_categories(self, **kwargs):
         return self.published().filter(parent__isnull=True)
 
