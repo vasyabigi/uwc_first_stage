@@ -5,13 +5,9 @@ from core.decorators import select_related_required
 from core.models import BaseManager, QuerysetHelpers, get_upload_path
 
 
-class CategoryManager(models.Manager):
-
-    def published(self, **kwargs):
-        return self.filter(published=True, **kwargs)
-
+class CategoryManager(QuerysetHelpers):
     def root_categories(self, **kwargs):
-        return self.published(parent__isnull=True, **kwargs)
+        return self.published().filter(parent__isnull=True)
 
 
 class Category(models.Model):
@@ -41,6 +37,10 @@ class Category(models.Model):
 class ProductQueryset(models.query.QuerySet, QuerysetHelpers):
     DEFAULT_SELECT_RELATED = ('provider', 'category', 'category_parent')
 
+    def with_variants(self):
+        """ Prefetch variants of product """
+        return self.prefetch_related('variants')
+
 
 class ProductManager(BaseManager):
     def get_query_set(self):
@@ -50,7 +50,13 @@ class ProductManager(BaseManager):
 class Product(models.Model):
     provider = models.ForeignKey('providers.Provider', related_name='products')
     category = models.ForeignKey(Category, related_name="products")
-
+    parent = models.ForeignKey(
+        'self',
+        verbose_name=_('Variant'),
+        null=True,
+        blank=True,
+        related_name='variants'
+    )
     name = models.CharField(_('Product name'), max_length=120)
     slug = models.SlugField(_('Product permalink'), unique=True)
     description = models.TextField(_('Description'))
@@ -68,6 +74,11 @@ class Product(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.name
+
+    @select_related_required('variants')
+    def get_variants(self):
+        """ Get variants of current product"""
+        return self.variants or []
 
     @models.permalink
     def get_absolute_url(self):
@@ -89,11 +100,14 @@ class ParameterValue(models.Model):
 
 class CategoryParameter(models.Model):
     """
-        Parameters that we can use for discribe product of category.
+        Parameters that we can use for describe product of category.
         e.g Display Size, Hdd, ...
     """
     category = models.ForeignKey(Category, related_name='parameters')
     parameter = models.ForeignKey(Parameter, related_name='related_categories')
+
+    class Meta:
+        unique_together = (('category', 'parameter'),)
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -117,7 +131,7 @@ class ProductParameter(models.Model):
     value = models.ForeignKey(ParameterValue)
 
     class Meta:
-        unique_together = ('product', 'parameter')
+        unique_together = (('product', 'parameter'), )
 
     def __unicode__(self):
         return u'%s' % self.value
