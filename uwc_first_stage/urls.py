@@ -13,7 +13,7 @@ urlpatterns = patterns('',
     url(r'^products/', include('products.urls')),
 )
 
-if settings.LOCAL_DEVELOPMENT:
+if settings.DEBUG:
     urlpatterns += patterns("django.views",
         url(r"%s(?P<path>.*)$" % settings.STATIC_URL[1:], "static.serve", {
             "document_root": settings.STATIC_ROOT,

@@ -1,8 +1,8 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from core.decorators import select_related_required
-
-from core.models import BaseManager, QuerysetHelpers, get_upload_path
+from core.models import BaseManager, QuerysetHelpers
+from sorl.thumbnail import ImageField
 
 
 class CategoryManager(models.Manager, QuerysetHelpers):
@@ -60,12 +60,6 @@ class Product(models.Model):
     name = models.CharField(_('Product name'), max_length=120)
     slug = models.SlugField(_('Product permalink'), unique=True)
     description = models.TextField(_('Description'))
-    image = models.ImageField(
-        _('Image'),
-        null=True,
-        blank=True,
-        upload_to=get_upload_path
-    )
     published = models.BooleanField(_("Product is published"), default=False)
 
     created = models.DateTimeField(auto_now_add=True)
@@ -83,6 +77,15 @@ class Product(models.Model):
     @models.permalink
     def get_absolute_url(self):
         return 'product-details', (self.category.slug, self.slug)
+
+
+class ProductImage(models.Model):
+    product = models.ForeignKey(Product, related_name="images")
+    is_main_image = models.BooleanField(default=False)
+    image = ImageField(upload_to='images/', null=True, blank=True)
+
+    def __unicode__(self):
+        return u'%s' % self.product
 
 
 class Parameter(models.Model):

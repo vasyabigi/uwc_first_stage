@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     # Plugins:
     'south',
     'javascript_settings',
+    'sorl.thumbnail',
 
     # Apps:
     'core',

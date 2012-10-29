@@ -47,7 +47,7 @@ django.jQuery(function(){
         _selectCorrectChoices: function(el, choicesDict, field){
             var availableChoices = choicesDict[el.val()] || [],
                 availableSelector = availableChoices.map(function(id){
-                    return 'option[value=' + id +']'
+                    return 'option[value=' + id +']';
                 }).join(', ');
             // Hide all choices. Then show choices that belongs to current category/parameter.
             field.find('option').hide().filter(availableSelector).show();

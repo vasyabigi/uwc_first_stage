@@ -1,6 +1,12 @@
 from django.contrib import admin
-from models import Category, Product
-from products.models import Parameter, CategoryParameter, ParameterValue, ProductParameter
+from models import Category, Product, Parameter, CategoryParameter, ParameterValue, ProductParameter, ProductImage
+from forms import ProductImageInlineFormset
+from sorl.thumbnail.admin import AdminImageMixin
+
+
+class ProductImageInline(AdminImageMixin, admin.TabularInline):
+    model = ProductImage
+    formset = ProductImageInlineFormset
 
 
 class ProductParameterInline(admin.StackedInline):
@@ -16,9 +22,10 @@ class ProductParameterInline(admin.StackedInline):
 
 class ProductAdmin(admin.ModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
-    fields = ('provider', 'category', 'name', 'description', 'image', 'slug', 'published')
+    fields = ('provider', 'category', 'name', 'description', 'slug', 'published')
     inlines = (
         ProductParameterInline,
+        ProductImageInline,
     )
 
     class Media:
@@ -35,7 +42,7 @@ class ProductAdmin(admin.ModelAdmin):
         # Categories and parameters
         category_parameters_dict = {}
         for cat, param in category_parameters:
-            category_parameters_dict.setdefault(cat, [] ).append(param)
+            category_parameters_dict.setdefault(cat, []).append(param)
 
         parameter_values = ParameterValue.objects\
             .all()\
@@ -44,7 +51,7 @@ class ProductAdmin(admin.ModelAdmin):
         # Parameters and values
         parameters_dict = {}
         for param, val in parameter_values:
-            parameters_dict.setdefault(param, [] ).append(val)
+            parameters_dict.setdefault(param, []).append(val)
 
         request.javascript_settings.update({
             'adminProductPage': {
