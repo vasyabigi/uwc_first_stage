@@ -1,10 +1,12 @@
 language: python
 python:
-  - "2.7"
   - "2.6"
+  - "2.7"
 env:
-  - DJANGO_VERSION=1.4
+  - DJANGO=1.4
 install:
- - pip install -r requirements.txt --use-mirrors
- - pip install -q Django==$DJANGO_VERSION --use-mirrors
-script:  nosetests
+  - pip install argparse --use-mirrors
+  - pip install -q Django==$DJANGO --use-mirrors
+  - pip install -r requirements.txt --use-mirrors
+script:
+  - python uwc_first_stage/quicktest.py core products providers
