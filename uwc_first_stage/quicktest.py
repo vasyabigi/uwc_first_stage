@@ -33,18 +33,14 @@ class QuickDjangoTest(object):
     def run_tests(self):
 
         settings.configure(
-            DEBUG = True,
-            DATABASES = {
+            DEBUG=True,
+            DATABASES={
                 'default': {
                     'ENGINE': 'django.db.backends.sqlite3',
                     'NAME': os.path.join(self.DIRNAME, 'dev.db'),
-                    'USER': '',
-                    'PASSWORD': '',
-                    'HOST': '',
-                    'PORT': '',
                 }
             },
-            INSTALLED_APPS = self.INSTALLED_APPS + self.apps
+            INSTALLED_APPS=self.INSTALLED_APPS + self.apps
         )
         from django.test.simple import DjangoTestSuiteRunner
         failures = DjangoTestSuiteRunner().run_tests(self.apps, verbosity=1)

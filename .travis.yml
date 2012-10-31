@@ -2,11 +2,11 @@ language: python
 python:
   - "2.6"
   - "2.7"
-env:
-  - DJANGO=1.4
 install:
   - pip install argparse --use-mirrors
-  - pip install -q Django==$DJANGO --use-mirrors
   - pip install -r requirements.txt --use-mirrors
+  - pip install pep8 --use-mirrors
+before_script:
+  - "pep8 --exclude=migrations --ignore=E501,E225,E128 uwc_first_stage"
 script:
   - python uwc_first_stage/quicktest.py core products providers
