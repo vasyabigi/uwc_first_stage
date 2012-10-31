@@ -1,13 +1,23 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from core.decorators import select_related_required
-from core.models import BaseManager, QuerysetHelpers
+from core.models import BaseManager, QuerysetHelpers, get_upload_path
 from sorl.thumbnail import ImageField
 
 
-class CategoryManager(models.Manager, QuerysetHelpers):
-    def root_categories(self, **kwargs):
-        return self.published().filter(parent__isnull=True)
+class CategoryQueryset(models.query.QuerySet, QuerysetHelpers):
+    DEFAULT_SELECT_RELATED = ('parent',)
+
+
+class CategoryManager(BaseManager):
+    def get_query_set(self):
+        return CategoryQueryset(self.model, using=self._db)
+
+    def root_categories(self):
+        q = self.published()\
+            .filter(parent__isnull=True)\
+            .prefetch_related('subcategories')
+        return q
 
 
 class Category(models.Model):
@@ -41,10 +51,30 @@ class ProductQueryset(models.query.QuerySet, QuerysetHelpers):
         """ Prefetch variants of product """
         return self.prefetch_related('variants')
 
+    def prefeth_parameters(self):
+        return self.prefetch_related(
+            'parameters',
+            'parameters__parameter',
+            'parameters__value'
+        )
+
+    def for_view(self, **kwargs):
+        """
+            Return queryset which is ready for a view
+            (with all required related records and prefetched)
+        """
+
+        q = self.published()\
+            .with_related()\
+            .prefeth_parameters()\
+            .filter(**kwargs)
+
+        return q
+
 
 class ProductManager(BaseManager):
     def get_query_set(self):
-        return ProductQueryset()
+        return ProductQueryset(self.model, using=self._db)
 
 
 class Product(models.Model):
@@ -64,7 +94,7 @@ class Product(models.Model):
 
     created = models.DateTimeField(auto_now_add=True)
 
-    object = ProductManager()
+    objects = ProductManager()
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -73,6 +103,11 @@ class Product(models.Model):
     def get_variants(self):
         """ Get variants of current product"""
         return self.variants or []
+
+    @select_related_required('parameters', 'parameters__value')
+    def get_short_specifications(self):
+        specifications = ' / '.join([unicode(param.value) for param in self.parameters])
+        return specifications
 
     @models.permalink
     def get_absolute_url(self):
@@ -88,8 +123,17 @@ class ProductImage(models.Model):
         return u'%s' % self.product
 
 
+class ParameterManager(BaseManager):
+    def filter_by_category(self, category):
+        return self.get_query_set().filter(
+            related_categories__category=category
+        )
+
+
 class Parameter(models.Model):
     name = models.CharField(_('Parameter Name'), max_length=120)
+
+    objects = ParameterManager()
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -99,9 +143,8 @@ class ParameterValue(models.Model):
     parameter = models.ForeignKey(Parameter, related_name='values')
     value = models.CharField(max_length=120)
 
-    #@select_related_required('parameter')
     def __unicode__(self):
-        return u'%s - %s' % (unicode(self.parameter), self.value)
+        return u'%s' % self.value
 
 
 class CategoryParameter(models.Model):
@@ -131,5 +174,6 @@ class ProductParameter(models.Model):
     class Meta:
         unique_together = (('product', 'parameter'), )
 
+    @select_related_required('value')
     def __unicode__(self):
         return u'%s' % self.value

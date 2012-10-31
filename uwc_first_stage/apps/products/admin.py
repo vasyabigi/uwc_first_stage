@@ -1,8 +1,8 @@
+from sorl.thumbnail.admin import AdminImageMixin
 from django.contrib import admin
 from models import Category, Product, Parameter, CategoryParameter, ParameterValue, ProductParameter, ProductImage
 from forms import ProductImageInlineFormset
-from sorl.thumbnail.admin import AdminImageMixin
-
+from forms_admin import ProductParameterForm
 
 class ProductImageInline(AdminImageMixin, admin.TabularInline):
     model = ProductImage
@@ -14,10 +14,11 @@ class ProductParameterInline(admin.StackedInline):
         Adds ability to add/change parameters on product page
     """
     model = ProductParameter
+    form = ProductParameterForm
 
     def queryset(self, request):
         q = super(ProductParameterInline, self).queryset(request)
-        return q.select_related('parameter__parameter', 'value__parameter')
+        return q.select_related('parameter', 'value').prefetch_related('parameter', 'value')
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -31,6 +32,12 @@ class ProductAdmin(admin.ModelAdmin):
     class Media:
         # Managing categories and related parameters
         js = ('js/admin/product_parameter_choices.js',)
+
+    def queryset(self, request):
+        q = super(ProductAdmin, self).queryset(request)
+            #.for_view()
+
+        return q
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         # Add category and parameters data to javascript context

@@ -3,4 +3,5 @@
 {% block content %}
   <p>Category: <a href="{{ category.get_absolute_url }}">{{ category }}</a></p>
   <p>Product: {{ product }}</p>
+    <p>Product: {{ product.get_short_specifications }}</p>
 {% endblock content %}

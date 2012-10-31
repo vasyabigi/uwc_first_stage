@@ -19,7 +19,7 @@ class QuerysetHelpers(object):
         """
         q = self
         if self.DEFAULT_SELECT_RELATED:
-            q = self.select_related(*self.DEFAULT_RELATED)
+            q = self.select_related(*self.DEFAULT_SELECT_RELATED)
 
         if self.DEFAULT_PREFETCH_RELATED:
             q = self.select_related(*self.DEFAULT_PREFETCH_RELATED)
@@ -27,7 +27,7 @@ class QuerysetHelpers(object):
         return q
 
 
-class BaseManager(models.Model):
+class BaseManager(models.Manager):
     def __getattr__(self, attr, *args):
         """
             Looks method also in queryset

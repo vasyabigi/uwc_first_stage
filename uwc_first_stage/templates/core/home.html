@@ -6,13 +6,11 @@
     {% for category in categories %}
       <li>
         <a href="{{ category.get_absolute_url }}">{{ category }}</a>
-        {% if category.subcategories.exists %}
           {% for subcategory in category.subcategories.all %}
             <ul>
               <li><a href="{{ subcategory.get_absolute_url }}">{{ subcategory }}</a></li>
             </ul>
           {% endfor %}
-        {% endif %}
       </li>
     {% endfor %}
   </ul>

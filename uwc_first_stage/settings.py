@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     # Plugins:
     'south',
     'javascript_settings',
+    'ajax_select',
     'sorl.thumbnail',
 
     # Apps:
@@ -100,6 +101,14 @@ INSTALLED_APPS = (
     'providers',
     'products'
 )
+
+# define the lookup channels in use on the site
+AJAX_LOOKUP_CHANNELS = {
+    #   pass a dict with the model and the field to search against
+    'parameters'  : {'model':'products.parameter', 'search_field':'name'},
+    'parametervalues'  : {'model':'products.parametervalue', 'search_field':'value'}
+}
+AJAX_SELECT_INLINES = 'inline'
 
 
 LOGGING = {

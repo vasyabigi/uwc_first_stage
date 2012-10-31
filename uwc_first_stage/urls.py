@@ -3,11 +3,12 @@ from django.conf.urls import patterns, include, url
 from django.contrib import admin
 
 from core.views import home
-
+from ajax_select import urls as ajax_select_urls
 admin.autodiscover()
 
 urlpatterns = patterns('',
     url(r'^admin/', include(admin.site.urls)),
+    url(r'^admin/lookups/', include(ajax_select_urls)),
 
     url(r'^$', home, name="home"),
     url(r'^products/', include('products.urls')),

@@ -3,9 +3,9 @@
 {% block content %}
   <p><a href="{% url home %}">Home</a></p>
   <p>Category: {{ category }}</p>
-  {% if category.products.exists %}
+  {% if products.exists %}
     <ul>
-      {% for product in category.products.all %}
+      {% for product in products %}
         <li><a href="{{ product.get_absolute_url }}">{{ product }}</a></li>
       {% endfor %}
     </ul>
