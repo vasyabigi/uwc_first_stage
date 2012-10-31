@@ -16,11 +16,10 @@ class ParameterFilteringForm(forms.Form):
         widget=forms.CheckboxInput(),
         queryset=Parameter.objects.none()
     )
-    
+
     def __init__(self, category, *args, **kwargs):
         super(ParameterFilteringForm, self).__init__(*args, **kwargs)
         self.fields['parameters'].queryset = Parameter.objects.filter_by_category(category)
 
     def get_products(self):
         return Product.objects.filter_by_parameters(self.cleaned_data['parameters'])
-

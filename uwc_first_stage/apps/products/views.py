@@ -32,7 +32,6 @@ def product_details(request, category_slug, product_slug):
 
     category = product.category
 
-
     context = {
         'category': category,
         'product': product
