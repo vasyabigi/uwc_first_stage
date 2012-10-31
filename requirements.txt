@@ -3,8 +3,8 @@ django
 south
 django-debug-toolbar
 django-extensions
-django-ajax-selects
 werkzeug
 psycopg2
 PIL
 sorl-thumbnail
+-e git+https://github.com/digi604/django-smart-selects.git#egg=django-smart-selects
