@@ -1,4 +1,5 @@
 from django.db import models
+from django.db.models.query import QuerySet
 import os
 
 
@@ -25,6 +26,25 @@ class QuerysetHelpers(object):
             q = self.select_related(*self.DEFAULT_PREFETCH_RELATED)
 
         return q
+
+
+class AllMethodCachingQueryset(QuerySet):
+    """
+        Caching all() methhod. Usefull for ModelChoicesField
+    """
+    def all(self, get_from_cache=True):
+        if get_from_cache:
+            return self
+        else:
+            return self._clone()
+
+
+class WithCachedAllMethodManager(models.Manager):
+    """
+        Manager for getting once data from db for Admin formsets
+    """
+    def get_query_set(self):
+        return AllMethodCachingQueryset(self.model, using=self._db)
 
 
 class BaseManager(models.Manager):

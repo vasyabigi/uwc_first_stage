@@ -1,7 +1,8 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from smart_selects.db_fields import ChainedForeignKey
 from core.decorators import select_related_required
-from core.models import BaseManager, QuerysetHelpers, get_upload_path
+from core.models import BaseManager, QuerysetHelpers, get_upload_path, WithCachedAllMethodManager
 from sorl.thumbnail import ImageField
 
 
@@ -134,6 +135,7 @@ class Parameter(models.Model):
     name = models.CharField(_('Parameter Name'), max_length=120)
 
     objects = ParameterManager()
+    simple_cached = WithCachedAllMethodManager()
 
     def __unicode__(self):
         return u'%s' % self.name
@@ -155,6 +157,8 @@ class CategoryParameter(models.Model):
     category = models.ForeignKey(Category, related_name='parameters')
     parameter = models.ForeignKey(Parameter, related_name='related_categories')
 
+    simple_cached = WithCachedAllMethodManager()
+
     class Meta:
         unique_together = (('category', 'parameter'),)
 
@@ -169,7 +173,13 @@ class ProductParameter(models.Model):
     """
     product = models.ForeignKey(Product, related_name='parameters')
     parameter = models.ForeignKey(Parameter, related_name='related_product_parameters')
-    value = models.ForeignKey(ParameterValue)
+    value = ChainedForeignKey(
+        ParameterValue,
+        chained_field="parameter",
+        chained_model_field="parameter",
+        show_all=False,
+        auto_choose=True
+    )
 
     class Meta:
         unique_together = (('product', 'parameter'), )

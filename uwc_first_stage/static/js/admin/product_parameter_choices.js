@@ -50,7 +50,7 @@ django.jQuery(function(){
                     return 'option[value=' + id +']';
                 }).join(', ');
             // Hide all choices. Then show choices that belongs to current category/parameter.
-            field.find('option').hide().filter(availableSelector).show();
+            field.find('option').nextAll().hide().filter(availableSelector).show();
         }
     };
 

@@ -2,7 +2,7 @@ from sorl.thumbnail.admin import AdminImageMixin
 from django.contrib import admin
 from models import Category, Product, Parameter, CategoryParameter, ParameterValue, ProductParameter, ProductImage
 from forms import ProductImageInlineFormset
-from forms_admin import ProductParameterForm
+
 
 class ProductImageInline(AdminImageMixin, admin.TabularInline):
     model = ProductImage
@@ -15,10 +15,16 @@ class ProductParameterInline(admin.StackedInline):
     """
     model = ProductParameter
     form = ProductParameterForm
-
+    
+    def get_formset(self, *args, **kwargs):
+        formset = super(ProductParameterInline, self).get_formset(*args, **kwargs)
+        # Override querieset of parameters (caching ModelChoiceField)
+        formset.form.base_fields['parameter'].queryset = Parameter.simple_cached.all()
+        return formset
+    
     def queryset(self, request):
         q = super(ProductParameterInline, self).queryset(request)
-        return q.select_related('parameter', 'value').prefetch_related('parameter', 'value')
+        return q.select_related('parameter', 'value')
 
 
 class ProductAdmin(admin.ModelAdmin):
@@ -32,12 +38,6 @@ class ProductAdmin(admin.ModelAdmin):
     class Media:
         # Managing categories and related parameters
         js = ('js/admin/product_parameter_choices.js',)
-
-    def queryset(self, request):
-        q = super(ProductAdmin, self).queryset(request)
-            #.for_view()
-
-        return q
 
     def render_change_form(self, request, context, add=False, change=False, form_url='', obj=None):
         # Add category and parameters data to javascript context
@@ -87,8 +87,7 @@ class CategoryParameterInline(admin.StackedInline):
 
         # Override queryset of parameters. Shows only instance and parent parameters
         if ids:
-            formset.form.base_fields['parameter'].queryset = formset.form.base_fields['parameter']\
-                .queryset.filter(
+            formset.form.base_fields['parameter'].queryset = Parameter.simple_cached.filter(
                 related_categories__category__in=ids
             ).distinct()
 
