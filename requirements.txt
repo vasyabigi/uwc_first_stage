@@ -3,6 +3,7 @@ django
 south
 django-debug-toolbar
 django-extensions
+django-ajax-selects
 werkzeug
 psycopg2
 PIL
