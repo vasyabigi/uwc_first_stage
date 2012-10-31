@@ -14,14 +14,15 @@ class ProductParameterInline(admin.StackedInline):
         Adds ability to add/change parameters on product page
     """
     model = ProductParameter
-    form = ProductParameterForm
-    
+    # What's it for?
+    # form = ProductParameterForm
+
     def get_formset(self, *args, **kwargs):
         formset = super(ProductParameterInline, self).get_formset(*args, **kwargs)
         # Override querieset of parameters (caching ModelChoiceField)
         formset.form.base_fields['parameter'].queryset = Parameter.simple_cached.all()
         return formset
-    
+
     def queryset(self, request):
         q = super(ProductParameterInline, self).queryset(request)
         return q.select_related('parameter', 'value')

@@ -12,6 +12,7 @@ urlpatterns = patterns('',
 
     url(r'^$', home, name="home"),
     url(r'^products/', include('products.urls')),
+    url(r'^search/', include('haystack.urls')),
 )
 
 if settings.DEBUG:

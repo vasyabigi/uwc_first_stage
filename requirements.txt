@@ -1,5 +1,4 @@
 django
--e git+https://github.com/django-stars/django-js-settings.git#egg=django-javascript-settings
 south
 django-debug-toolbar
 django-extensions
@@ -7,4 +6,7 @@ werkzeug
 psycopg2
 PIL
 sorl-thumbnail
+whoosh
 -e git+https://github.com/digi604/django-smart-selects.git#egg=django-smart-selects
+-e git+https://github.com/django-stars/django-js-settings.git#egg=django-javascript-settings
+-e git+https://github.com/toastdriven/django-haystack.git@master#egg=django-haystack

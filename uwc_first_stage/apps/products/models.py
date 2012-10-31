@@ -2,7 +2,7 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 from smart_selects.db_fields import ChainedForeignKey
 from core.decorators import select_related_required
-from core.models import BaseManager, QuerysetHelpers, get_upload_path, WithCachedAllMethodManager
+from core.models import BaseManager, QuerysetHelpers, WithCachedAllMethodManager
 from sorl.thumbnail import ImageField
 
 
@@ -81,13 +81,8 @@ class ProductManager(BaseManager):
 class Product(models.Model):
     provider = models.ForeignKey('providers.Provider', related_name='products')
     category = models.ForeignKey(Category, related_name="products")
-    parent = models.ForeignKey(
-        'self',
-        verbose_name=_('Variant'),
-        null=True,
-        blank=True,
-        related_name='variants'
-    )
+    parent = models.ForeignKey('self', verbose_name=_('Variant'),
+        null=True, blank=True, related_name='variants')
     name = models.CharField(_('Product name'), max_length=120)
     slug = models.SlugField(_('Product permalink'), unique=True)
     description = models.TextField(_('Description'))

@@ -1,5 +1,5 @@
-from functools import partial
 from django.db.models import Manager
+
 
 def memoize_method(func):
     """
@@ -33,7 +33,6 @@ def select_related_required(*fields):
         def _wrap_f(model_instance, *args, **kwargs):
             cache_attribute_name = '_%s_cache'
 
-
             def _check_cache(obj, field_name):
                 field = getattr(obj, field_name)
 
@@ -47,7 +46,7 @@ def select_related_required(*fields):
                     cache_attr = cache_attribute_name % field_name
                     if not hasattr(obj, cache_attribute_name % field_name):
                         raise Exception('Use select related for this fields, bitch: %s' % str(fields))
-                    return  getattr(obj, cache_attr)
+                    return getattr(obj, cache_attr)
 
             def _reducer(obj, field):
                 next_obj = None

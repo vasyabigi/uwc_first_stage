@@ -92,6 +92,9 @@ INSTALLED_APPS = (
 
     # Plugins:
     'south',
+    'haystack',
+    'whoosh',
+    'sorl.thumbnail',
     'javascript_settings',
     'sorl.thumbnail',
     'smart_selects',
@@ -101,7 +104,6 @@ INSTALLED_APPS = (
     'providers',
     'products'
 )
-
 
 LOGGING = {
     'version': 1,
@@ -140,6 +142,15 @@ LOGGING = {
 }
 
 LOCAL_INSTALLED_APPS = LOCAL_MIDDLEWARE_CLASSES = tuple()
+
+HAYSTACK_CONNECTIONS = {
+    'default': {
+        'ENGINE': 'haystack.backends.whoosh_backend.WhooshEngine',
+        'PATH': os.path.join(os.path.dirname(__file__), 'whoosh_index'),
+        'INCLUDE_SPELLING': True,
+    },
+}
+
 
 try:
     from settings_local import *
