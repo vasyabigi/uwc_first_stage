@@ -1,5 +1,6 @@
 django
 south
+fabric
 django-debug-toolbar
 django-extensions
 werkzeug
