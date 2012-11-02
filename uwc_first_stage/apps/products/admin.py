@@ -1,7 +1,8 @@
 from sorl.thumbnail.admin import AdminImageMixin
 from django.contrib import admin
 from models import Category, Product, Parameter, CategoryParameter, ParameterValue, ProductParameter, ProductImage
-from forms import ProductImageInlineFormset
+from forms import ProductImageInlineFormset, ProductAdminForm
+from mptt.admin import MPTTModelAdmin
 
 
 class ProductImageInline(AdminImageMixin, admin.TabularInline):
@@ -29,6 +30,7 @@ class ProductParameterInline(admin.StackedInline):
 
 
 class ProductAdmin(admin.ModelAdmin):
+    form = ProductAdminForm
     prepopulated_fields = {"slug": ("name",)}
     fields = ('provider', 'category', 'name', 'description', 'slug', 'published')
     inlines = (
@@ -99,9 +101,10 @@ class CategoryParameterInline(admin.StackedInline):
         return q.select_related('parameter', 'category', 'category__parent')
 
 
-class CategoryAdmin(admin.ModelAdmin):
+class CategoryAdmin(MPTTModelAdmin):
     prepopulated_fields = {"slug": ("name",)}
     inlines = (CategoryParameterInline,)
+    mptt_level_indent = 20
 
 
 class ParameterValueInline(admin.StackedInline):

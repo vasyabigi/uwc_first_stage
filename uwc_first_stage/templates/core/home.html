@@ -1,6 +1,8 @@
 {% extends "base.html" %}
+ {% load mptt_tags %}
 
 {% block content %}
+  {% full_tree_for_model products.Category as categories %}
   <p>Categories:</p>
   <ul>
     {% for category in categories %}

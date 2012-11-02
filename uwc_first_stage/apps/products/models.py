@@ -1,5 +1,6 @@
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
+from mptt.models import MPTTModel, TreeForeignKey
 from smart_selects.db_fields import ChainedForeignKey
 from core.decorators import select_related_required
 from core.models import BaseManager, QuerysetHelpers, WithCachedAllMethodManager
@@ -21,12 +22,12 @@ class CategoryManager(BaseManager):
         return q
 
 
-class Category(models.Model):
+class Category(MPTTModel):
     # TODO: Published categories?
     # TODO: Position
     name = models.CharField(_('Category name'), max_length=150)
     slug = models.SlugField(_('Category permalink'), unique=True)
-    parent = models.ForeignKey(
+    parent = TreeForeignKey(
         'self',
         related_name='subcategories',
         limit_choices_to={'parent__isnull': True},
@@ -39,6 +40,9 @@ class Category(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.name
+
+    class MPTTMeta:
+        order_insertion_by = ['name']
 
     @models.permalink
     def get_absolute_url(self):
@@ -152,7 +156,7 @@ class CategoryParameter(models.Model):
     category = models.ForeignKey(Category, related_name='parameters')
     parameter = models.ForeignKey(Parameter, related_name='related_categories')
 
-    simple_cached = WithCachedAllMethodManager()
+    # simple_cached = WithCachedAllMethodManager()
 
     class Meta:
         unique_together = (('category', 'parameter'),)

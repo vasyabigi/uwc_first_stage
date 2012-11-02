@@ -1,6 +1,7 @@
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-from products.models import Parameter, Product
+from products.models import Parameter, Product, Category
+from mptt.forms import TreeNodeChoiceField
 
 
 class ProductImageInlineFormset(forms.models.BaseInlineFormSet):
@@ -23,3 +24,10 @@ class ParameterFilteringForm(forms.Form):
 
     def get_products(self):
         return Product.objects.filter_by_parameters(self.cleaned_data['parameters'])
+
+
+class ProductAdminForm(forms.ModelForm):
+    category = TreeNodeChoiceField(queryset=Category.tree.all(), empty_label=_("Choose category"))
+
+    class Meta:
+        model = Product

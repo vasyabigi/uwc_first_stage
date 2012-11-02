@@ -95,6 +95,7 @@ INSTALLED_APPS = (
     'haystack',
     'whoosh',
     'sorl.thumbnail',
+    'mptt',
     'javascript_settings',
     'sorl.thumbnail',
     'smart_selects',
